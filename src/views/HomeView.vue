@@ -136,7 +136,11 @@ watch(showMoreInfoDialog, (newValue) => {
 
 async function fetchMoreInfo(activity:any) {
     const data = await store.run(store.moreInfoCommand, `the user wants more information about "${activity.name}"`);
-    activity._more_info = data.messageContent.activity;
+    if (data.messageContent.activity && typeof data.messageContent.activity === 'object') {
+      activity._more_info = data.messageContent.activity;
+    } else if (data.messageContent.description) {
+      activity._more_info = data.messageContent;
+    }
 
     // activity._more_info = {
     //     "name": "Bogotá Food & Local Markets Tour",
@@ -163,10 +167,10 @@ function showMoreInfo(activity: any) {
 async function runHelp() {
   const moreContext = selecteActivity.value ? `the user wants more information about "${selecteActivity.value.name}"` : '';
   if (helpQuestion.value) {
-      const data = (await store.run(helpQuestion.value, moreContext)).messageContent;
+      const data = (await store.run(helpQuestion.value, moreContext));
       // const data = `Yes, in Bogotá, Colombia, and throughout the country, you should use Colombian Pesos (COP) for all transactions. This includes everything from museum entrances, public transportation fares, meals, and other purchases or services. Colombian Pesos is the official currency, and using it is the standard and expected method of payment.`
       helpQuestion.value = '';
-      if (typeof data === 'string') {
+      if (typeof data.messageContent === 'string') {
         helpList.value = [data.split('\n').map( (m: string) => {
           if (m==='') {
               return '<br />';
@@ -177,16 +181,10 @@ async function runHelp() {
           if (m.startsWith('-')) {
             return '<li>' + m.replace('-', '') + '</li>';
           }
-          return '<p>' + m + '</p>';
+          return `<p>${m}</p>`;
         }).join('').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')];
-      } else if (data && Object.keys(data).length > 0) {
-        helpList.value = [];
-        const key = Object.keys(data)[0];
-        if (data[key].length > 0 && data[key][0].name && data[key][0].description) {
-          store.activities = data[key];
-        } else {
-          console.log('I do not know how to process this data', data);
-        }
+      } else if (data.messageContent && typeof data.messageContent === 'object') {
+        store.setActivities(data);
         showhelp.value = false;
         selecteActivity.value = undefined;
         showMoreInfoDialog.value = false;
