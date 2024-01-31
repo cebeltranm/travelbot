@@ -37,23 +37,27 @@
           variant="text"
           v-if="isUrl(activity.reservation_link)"
           :href="activity.reservation_link"
+          target="_blank"
         >
         Reservation  
         </v-btn>
         <v-btn
           color="indigo-accent-3"
+          @click="$emit('showMoreInfo')"
         >
         More Info  
         </v-btn>
       </v-card-actions>
     </v-card>
+    
+
   </template>
   <script lang="ts" setup>
 import { ref } from 'vue';
-
 const props = defineProps<{
     activity: any,
 }>();
+
 
 const isUrl = (str: string) => {
   const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
@@ -64,4 +68,5 @@ const isUrl = (str: string) => {
     '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
     return !!pattern.test(str);
 };
-  </script>
+
+</script>

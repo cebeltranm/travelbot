@@ -3,7 +3,7 @@
   <v-layout class="rounded rounded-md">
     <v-app-bar prominent>
       <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Travel activities</v-toolbar-title>
+      <v-toolbar-title>Wíinik</v-toolbar-title>
     </v-app-bar>
 
     <v-navigation-drawer
