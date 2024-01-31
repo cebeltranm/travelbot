@@ -1,0 +1,67 @@
+<template>
+    <v-card
+      class="mx-auto my-3"
+      max-width="374"
+    >
+      <template v-slot:loader="{ isActive }">
+        <v-progress-linear
+          :active="isActive"
+          color="deep-purple"
+          height="4"
+          indeterminate
+        ></v-progress-linear>
+      </template>
+  
+      <v-card-item>
+        <v-card-title>{{ activity.name }}</v-card-title>
+        <v-card-subtitle>
+          <div><span v-if="activity.time">Time:  {{  activity.time }},</span><span v-if="activity.duration">Duration: {{ activity.duration }}</span></div>
+          <div>Location:  {{  activity.location }}</div>
+          <div>price:  {{  activity.price }}</div>
+        </v-card-subtitle>
+      </v-card-item>
+  
+      <v-card-text>
+        <div>
+            <p>{{  activity.description }}</p>
+            <p v-if="activity.notes && activity.notes !== ''">{{  activity.notes }}</p>
+            <p v-if="activity.reservation_link && !['','Not applicable'].includes(activity.reservation_link) && !isUrl(activity.reservation_link)">
+                Reservation: {{ activity.reservation_link }}
+            </p>
+        </div>
+      </v-card-text>
+  
+      <v-card-actions>
+        <v-btn
+          color="indigo-accent-3"
+          variant="text"
+          v-if="isUrl(activity.reservation_link)"
+          :href="activity.reservation_link"
+        >
+        Reservation  
+        </v-btn>
+        <v-btn
+          color="indigo-accent-3"
+        >
+        More Info  
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </template>
+  <script lang="ts" setup>
+import { ref } from 'vue';
+
+const props = defineProps<{
+    activity: any,
+}>();
+
+const isUrl = (str: string) => {
+  const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+};
+  </script>
