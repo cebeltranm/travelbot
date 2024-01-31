@@ -8,11 +8,11 @@ export const useActivitiesStore = defineStore('activities', () => {
   const activitiesCommand = ref( 'list the activities in json format and include prices, reservation links, locations, time, and duration');
   const moreInfoCommand = ref('give me more info about this, including price, trasportation suggestions, links to reservetations in json format ');
   const instructions = ref('you are a travel assistant who recommends activities for remote workers who enjoy knowing the city and around while working, using the Travel Planning plugin, and returning the content in a JSON format')
-  let thread = sessionStorage.getItem('thread') || 'thread_GxDias7DIga0BuroVOHuZsWA';
-  let lastActivityRun = sessionStorage.getItem('lastRunId') || 'run_Nwn2pjz2HLweyDOV8B8rQfck';
+  let thread = sessionStorage.getItem('thread');
+  let lastActivityRun = sessionStorage.getItem('lastRunId');
 
   async function loadLastActivities() {
-    if (thread && lastActivityRun) {
+    if (thread && lastActivityRun && thread !== '' && lastActivityRun !== '') {
       const { data } = await getCommandStatus(lastActivityRun, thread, true);
       if (data && typeof data.messageContent === 'object' && data.messageContent !== null && data.messageContent.activities){
         activities.value = data.messageContent.activities;
@@ -32,7 +32,7 @@ export const useActivitiesStore = defineStore('activities', () => {
       if (data && typeof data.messageContent === 'object' && data.messageContent !== null && data.messageContent.activities){
         activities.value = data.messageContent.activities;
         lastActivityRun = threadInfo.runId;
-        sessionStorage.setItem('lastRunId', lastActivityRun);
+        sessionStorage.setItem('lastRunId', lastActivityRun || '');
       }
     } catch (error) {
       return error

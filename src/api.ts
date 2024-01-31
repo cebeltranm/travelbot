@@ -1,7 +1,7 @@
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 console.log('SERVER_URL', SERVER_URL);
 
-export async function executeCommand(context: string, command: string, instructions: string, thread: string, wait: boolean) {
+export async function executeCommand(context: string, command: string, instructions: string, thread: string | null, wait: boolean) {
     const res = await fetch(`${SERVER_URL}command`, {
         method: 'POST',
         headers: {
