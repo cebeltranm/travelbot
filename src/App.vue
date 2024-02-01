@@ -23,7 +23,7 @@
           <v-textarea label="base instructions" v-model="store.instructions"></v-textarea>
         </v-list-item>        
         <v-list-item title="">
-          <v-btn @click.stop="run">Run</v-btn>
+          <v-btn @click.stop="run" :disabled="store.isProcessing">Run</v-btn>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useActivitiesStore } from '@/stores/activities'
 
 const drawer = ref(false);
@@ -50,5 +50,12 @@ const store = useActivitiesStore();
 function run() {
   store.loadActivities()
 }
+
+onMounted(async () => {
+  await store.loadLastActivities();
+  if (!store.activities) {
+    store.loadActivities();
+  }
+}) ;
 
 </script>

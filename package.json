@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build-only": "vite build --base=/travelbot/",
     "type-check": "vue-tsc --build --force",
-    "release": "npm run build && npm run publish",
+    "release": "npm run build-only && npm run publish",
     "publish": "gh-pages -t -d dist"
   },
   "dependencies": {

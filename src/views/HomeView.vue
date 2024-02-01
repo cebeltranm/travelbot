@@ -62,6 +62,27 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="store.isProcessing"
+      :scrim="false"
+      width="auto"
+      persistent
+    >
+      <v-card
+        color="primary"
+      >
+        <v-card-text>
+          Please stand by
+          <v-progress-linear
+            indeterminate
+            color="white"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog> 
+
     <v-layout-item
     class="text-end pointer-events-none"
     model-value
@@ -97,6 +118,7 @@
             color="primary"
             elevation="8"
             icon="mdi-play-circle"
+            :disabled="store.isProcessing"
             @click="runHelp"
           />
         </template>
@@ -124,7 +146,6 @@ const showMoreInfoDialog = ref(false);
 const showhelp = ref(false);
 const helpQuestion = ref('');
 const helpList = ref([]);
-
 const selecteActivity: any = ref(undefined);
 
 watch(showMoreInfoDialog, (newValue) => {
@@ -171,7 +192,7 @@ async function runHelp() {
       // const data = `Yes, in Bogotá, Colombia, and throughout the country, you should use Colombian Pesos (COP) for all transactions. This includes everything from museum entrances, public transportation fares, meals, and other purchases or services. Colombian Pesos is the official currency, and using it is the standard and expected method of payment.`
       helpQuestion.value = '';
       if (typeof data.messageContent === 'string') {
-        helpList.value = [data.split('\n').map( (m: string) => {
+        helpList.value = [data.messageContent.split('\n').map( (m: string) => {
           if (m==='') {
               return '<br />';
           }
@@ -203,10 +224,6 @@ const isUrl = (str: string) => {
     '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
     return !!pattern.test(str);
 };
-
-onMounted(() => {
-  store.loadLastActivities();
-})
 
 </script>
 <style scoped>
