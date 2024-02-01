@@ -21,28 +21,34 @@ app.get('/_ping', function (request, response) {
 app.post('/command', async (request, response) => {
     const thread = request.body.thread || (await openai.beta.threads.create()).id;
     console.log(request.body);
-    const threadMessages = await openai.beta.threads.messages.create(
-        thread,
-        { role: "user", content: request.body.command }
-    );
+    try {
+        const threadMessages = await openai.beta.threads.messages.create(
+            thread,
+            { role: "user", content: request.body.command }
+        );
 
-    console.log(threadMessages);
+        console.log(threadMessages);
 
-    const run = await openai.beta.threads.runs.create(
-        thread,
-        { 
-            assistant_id: ASSISTANT_ID,
-            additional_instructions: request.body.context,
-            instructions: request.body.instructions
-         },
-      );
-    
-      console.log(run);
+        const run = await openai.beta.threads.runs.create(
+            thread,
+            { 
+                assistant_id: ASSISTANT_ID,
+                additional_instructions: request.body.context,
+                instructions: request.body.instructions
+            },
+        );
+        
+        console.log(run);
 
-    response.status(200).json({
-        thread: thread,
-        run_id: run.id
-    });
+        response.status(200).json({
+            thread: thread,
+            run_id: run.id
+        });
+    } catch (e) {
+        response.status(500).json({
+            error: e.message
+        });
+    }
 })
 
 app.get('/command/:thread/:run', async (request, response) => {

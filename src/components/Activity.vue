@@ -16,7 +16,7 @@
         <v-card-title>{{ activity.name }}</v-card-title>
         <v-card-subtitle>
           <div><span v-if="activity.time">Time:  {{  activity.time }},</span><span v-if="activity.duration">Duration: {{ activity.duration }}</span></div>
-          <div>Location:  {{  activity.location }}</div>
+          <div v-if="activity.location">Location: <a href="#" @click.stop.prevent="showMap = true">{{  activity.location }}</a></div>
           <div>price:  {{  activity.price }}</div>
         </v-card-subtitle>
       </v-card-item>
@@ -51,9 +51,31 @@
     </v-card>
     
 
+    <v-dialog
+        transition="dialog-top-transition"
+        width="auto"
+        :modelValue="showMap"
+      >
+          <v-card>
+            <v-card-text v-if="showMap">
+              <iframe :src="`https://maps.google.com/maps?output=embed&q=${activity.location}`" width="360" height="270" frameborder="0" style="border:0"></iframe>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn
+                variant="text"
+                @click="showMap = false"
+              >Close</v-btn>
+            </v-card-actions>
+          </v-card>
+      </v-dialog>
+
+
   </template>
   <script lang="ts" setup>
 import { ref } from 'vue';
+
+const showMap = ref(false);
+
 const props = defineProps<{
     activity: any,
 }>();

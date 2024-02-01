@@ -31,36 +31,18 @@
 
       <v-card-text>
             <p v-if="selecteActivity._more_info.description"> {{ selecteActivity._more_info.description }}</p>
-            <template v-for="(value, key) in selecteActivity._more_info" :key="key">
-                <template v-if="!['name', 'description'].includes(key)">
-                    <h4 class="pt-5">{{ key.replaceAll('_', ' ').replace('reservation link', 'reservations') }}</h4>
-                    <a v-if="isUrl(value)" class="pl-10" :href="value" target="_blank"> {{ value }} </a>
-                    <p v-else class="pl-10"> {{ value }} </p>
-                </template>
-            </template>
+            <div v-if="selecteActivity._more_info.html" v-html="selecteActivity._more_info.html">
+
+            </div>
         </v-card-text>
         <v-card-actions>
         <v-spacer></v-spacer>
-
         <v-btn
           text="Close"
           @click="showMoreInfoDialog = false"
         ></v-btn>
       </v-card-actions>
     </v-card>
-      <v-card
-        color="primary"
-        v-if="selecteActivity && !selecteActivity._more_info"
-      >
-        <v-card-text>
-          Please stand by
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
     </v-dialog>
 
     <v-dialog
@@ -73,7 +55,7 @@
         color="primary"
       >
         <v-card-text>
-          Please stand by
+          we are collecting all the information to give you the best suggestions
           <v-progress-linear
             indeterminate
             color="white"
@@ -82,6 +64,7 @@
         </v-card-text>
       </v-card>
     </v-dialog> 
+
 
     <v-layout-item
     class="text-end pointer-events-none"
@@ -132,6 +115,7 @@
 import Activity from '@/components/Activity.vue';
 import { ref, computed, onMounted, watch } from 'vue';
 import { useActivitiesStore } from '@/stores/activities'
+import { detailsToHtml, detailsStringtoHtml } from '@/helpers';
 
 const store = useActivitiesStore();
 
@@ -157,24 +141,13 @@ watch(showMoreInfoDialog, (newValue) => {
 
 async function fetchMoreInfo(activity:any) {
     const data = await store.run(store.moreInfoCommand, `the user wants more information about "${activity.name}"`);
-    if (data.messageContent.activity && typeof data.messageContent.activity === 'object') {
-      activity._more_info = data.messageContent.activity;
-    } else if (data.messageContent.description) {
-      activity._more_info = data.messageContent;
-    }
-
-    // activity._more_info = {
-    //     "name": "Bogotá Food & Local Markets Tour",
-    //     "description": "Explore the rich culinary heritage of Bogotá on this guided tour of local markets. You'll have the chance to taste exotic fruits, traditional dishes, and learn about the ingredients that are essential to Colombian cuisine. This tour is an excellent way to understand the local food culture and meet other food enthusiasts.",
-    //     "price": "35 USD per person",
-    //     "duration": "3 hours",
-    //     "time": "Starts at 6PM",
-    //     "includes": "Guide, food samples",
-    //     "does_not_include": "Transportation to meeting point, personal purchases",
-    //     "transportation_suggestions": "The tour starts in La Candelaria, which is easily accessible by taxi or ridesharing apps like Uber. Public transportation is also available, but taking a taxi or Uber is recommended for convenience.",
-    //     "reservation_link": "https://www.bogotafoodtour.com/reservations",
-    //     "tips": "Wear comfortable walking shoes and bring a light jacket as Bogotá can be cool in the evening. Be sure to let your guide know of any dietary restrictions."
-    // }
+    if (Array.isArray(data.messageContent) ) {
+        activity._more_info = detailsToHtml(data.messageContent);
+      } else if (Object.keys(data.messageContent).length === 1) {
+        activity._more_info = detailsToHtml(data.messageContent[Object.keys(data.messageContent)[0]]);
+      } else {
+        console.log("no option used");
+      }
 }
 
 function showMoreInfo(activity: any) {
@@ -192,18 +165,7 @@ async function runHelp() {
       // const data = `Yes, in Bogotá, Colombia, and throughout the country, you should use Colombian Pesos (COP) for all transactions. This includes everything from museum entrances, public transportation fares, meals, and other purchases or services. Colombian Pesos is the official currency, and using it is the standard and expected method of payment.`
       helpQuestion.value = '';
       if (typeof data.messageContent === 'string') {
-        helpList.value = [data.messageContent.split('\n').map( (m: string) => {
-          if (m==='') {
-              return '<br />';
-          }
-          if (m.startsWith('###')) {
-              return '<h3>' + m.replace('###', '') + '</h3>';
-          }
-          if (m.startsWith('-')) {
-            return '<li>' + m.replace('-', '') + '</li>';
-          }
-          return `<p>${m}</p>`;
-        }).join('').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')];
+        helpList.value = [detailsStringtoHtml(data.messageContent)];
       } else if (data.messageContent && typeof data.messageContent === 'object') {
         store.setActivities(data);
         showhelp.value = false;
@@ -215,18 +177,8 @@ async function runHelp() {
     }
 }
 
-const isUrl = (str: string) => {
-  const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
-    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-    return !!pattern.test(str);
-};
-
 </script>
-<style scoped>
+<style>
 .detail_info p::first-letter {
     text-transform: uppercase;
 }
